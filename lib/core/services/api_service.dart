@@ -1,17 +1,13 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-
 class ApiService {
-  final String baseUrl = 'https://forkify-api.herokuapp.com/api/v2/recipes';
+  final Dio _dio = Dio();
 
-  Future<List<dynamic>> fetchRecipes(String query) async {
-    final response = await http.get(Uri.parse('$baseUrl?search=$query'));
+  Future<Map<String, dynamic>> fetchRecipes(String query) async {
+    final response = await _dio.get('${Constants.forkifyBaseUrl}?search=$query');
+    return response.data;
+  }
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return data['data']['recipes'];
-    } else {
-      throw Exception('Falha ao carregar receitas');
-    }
+  Future<Map<String, dynamic>> fetchRecipeDetails(String id) async {
+    final response = await _dio.get('${Constants.forkifyBaseUrl}/$id');
+    return response.data;
   }
 }
