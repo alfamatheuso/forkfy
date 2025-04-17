@@ -1,79 +1,62 @@
 import 'package:flutter/material.dart';
-import 'package:mvc_pattern/mvc_pattern.dart';
-import '../controller/home_controller.dart';
-import '../../../core/config/app_routes.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class HomePage extends StatelessWidget {
+  final HomeController controller;
 
-  @override
-  StateMVC<HomePage> createState() => _HomePageState();
-}
+  HomePage({required this.controller});
 
-class _HomePageState extends StateMVC<HomePage> {
-  late HomeController controller;
-  final searchController = TextEditingController();
-
-  _HomePageState() : super(HomeController()) {
-    controller = controllerMVC as HomeController;
-  }
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+    controller.loadFavorites();
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Receitas Forkify'),
+        title: Text('Forkify Receitas'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.favorite),
-            onPressed: () {
-              Navigator.pushNamed(context, AppRoutes.favorites);
-            },
-          ),
+              icon: Icon(Icons.favorite),
+              onPressed: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => FavoritesPage(controller: controller)));
+              })
         ],
       ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: EdgeInsets.all(8),
             child: TextField(
-              controller: searchController,
+              controller: _searchController,
               decoration: InputDecoration(
-                labelText: 'Pesquisar receitas',
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.search),
-                  onPressed: () {
-                    controller.searchRecipes(searchController.text);
-                  },
-                ),
-              ),
+                  border: OutlineInputBorder(), hintText: 'Pesquisar receitas'),
             ),
           ),
+          ElevatedButton(
+              onPressed: () => controller.searchRecipes(_searchController.text),
+              child: Text('Buscar')),
           Expanded(
-            child: ListView.builder(
-              itemCount: controller.recipes.length,
-              itemBuilder: (context, index) {
-                final recipe = controller.recipes[index];
-                return GestureDetector(
-                  onDoubleTap: () {
-                    controller.toggleFavorite(recipe.id);
-                  },
-                  child: Card(
+            child: Observer(
+              builder: (_) => ListView.builder(
+                itemCount: controller.recipes.length,
+                itemBuilder: (_, index) {
+                  final recipe = controller.recipes[index];
+                  return GestureDetector(
+                    onDoubleTap: () => controller.toggleFavorite(recipe),
                     child: ListTile(
                       leading: Image.network(recipe.imageUrl),
                       title: Text(recipe.title),
-                      trailing: Icon(
-                        controller.isFavorite(recipe.id)
-                            ? Icons.favorite
-                            : Icons.favorite_border,
-                        color: controller.isFavorite(recipe.id)
-                            ? Colors.red
-                            : null,
-                      ),
+                      trailing: Observer(
+                          builder: (_) => Icon(
+                              controller.favoriteIds.contains(recipe.id)
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color: Colors.red)),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
         ],
