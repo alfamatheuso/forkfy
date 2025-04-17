@@ -1,40 +1,48 @@
-import 'package:mvc_pattern/mvc_pattern.dart';
-import '../../model/recipe_model.dart';
-import '../../../core/services/api_service.dart';
-import '../../../core/services/storage_service.dart';
+import 'package:mobx/mobx.dart';
 
-class HomeController extends ControllerMVC {
-  final ApiService apiService = ApiService();
-  final StorageService storageService = StorageService();
+part 'home_controller.g.dart';
 
-  List<RecipeModel> recipes = [];
-  List<String> favoriteIds = [];
+class HomeController = _HomeControllerBase with _$HomeController;
 
-  HomeController() {
-    loadFavorites();
-  }
+abstract class _HomeControllerBase with Store {
+  final ApiService apiService;
+  final DatabaseService databaseService;
 
-  void searchRecipes(String query) async {
+  _HomeControllerBase(this.apiService, this.databaseService);
+
+  @observable
+  ObservableList<Recipe> recipes = ObservableList<Recipe>();
+
+  @observable
+  ObservableSet<String> favoriteIds = ObservableSet<String>();
+
+  @action
+  Future<void> searchRecipes(String query) async {
     final data = await apiService.fetchRecipes(query);
-    setState(() {
-      recipes = data.map((json) => RecipeModel.fromJson(json)).toList();
-    });
+    recipes.clear();
+    recipes.addAll((data['data']['recipes'] as List)
+        .map((json) => Recipe.fromJson({
+              'id': json['id'],
+              'title': json['title'],
+              'imageUrl': json['image_url']
+            }))
+        .toList());
   }
 
-  void loadFavorites() async {
-    favoriteIds = await storageService.getFavorites();
-    setState(() {});
-  }
-
-  void toggleFavorite(String id) {
-    if (favoriteIds.contains(id)) {
-      favoriteIds.remove(id);
+  @action
+  Future<void> toggleFavorite(Recipe recipe) async {
+    if (favoriteIds.contains(recipe.id)) {
+      await databaseService.removeFavorite(recipe.id);
+      favoriteIds.remove(recipe.id);
     } else {
-      favoriteIds.add(id);
+      await databaseService.addFavorite(recipe.toJson());
+      favoriteIds.add(recipe.id);
     }
-    storageService.saveFavorites(favoriteIds);
-    setState(() {});
   }
 
-  bool isFavorite(String id) => favoriteIds.contains(id);
+  @action
+  Future<void> loadFavorites() async {
+    final favs = await databaseService.getFavorites();
+    favoriteIds = ObservableSet.of(favs.map((fav) => fav['id'] as String));
+  }
 }
