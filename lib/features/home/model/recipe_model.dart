@@ -1,15 +1,15 @@
-class RecipeModel {
+import 'package:json_annotation/json_annotation.dart';
+
+part 'recipe_model.g.dart';
+
+@JsonSerializable()
+class Recipe {
   final String id;
   final String title;
   final String imageUrl;
 
-  RecipeModel({required this.id, required this.title, required this.imageUrl});
+  Recipe({required this.id, required this.title, required this.imageUrl});
 
-  factory RecipeModel.fromJson(Map<String, dynamic> json) {
-    return RecipeModel(
-      id: json['id'],
-      title: json['title'],
-      imageUrl: json['image_url'],
-    );
-  }
+  factory Recipe.fromJson(Map<String, dynamic> json) => _$RecipeFromJson(json);
+  Map<String, dynamic> toJson() => _$RecipeToJson(this);
 }
