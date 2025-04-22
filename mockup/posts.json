@@ -1,0 +1,10 @@
+[
+  {
+    "id": "101",
+    "userId": "1",
+    "content": "Olá, Flutter!",
+    "imageUrl": "https://placehold.it/300x200",
+    "likes": 10,
+    "comments": 2
+  }
+]
