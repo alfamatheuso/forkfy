@@ -1,5 +1,5 @@
 name: forkify_app
-description: Um aplicativo mobile para pesquisar e gerenciar receitas favoritas usando a API do Forkify.
+description: Um aplicativo mobile para pesquisar e gerenciar receitas favoritas usando a API do Forkify
 publish_to: 'none'
 version: 1.0.0+1
 
