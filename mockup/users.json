@@ -1,0 +1,11 @@
+[
+  {
+    "id": "1",
+    "name": "João Silva",
+    "email": "user@test.com",
+    "password": "123456",
+    "bio": "Desenvolvedor Flutter",
+    "followers": 150,
+    "following": 120
+  }
+]
