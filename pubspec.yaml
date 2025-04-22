@@ -23,6 +23,6 @@ dev_dependencies:
   mobx_codegen: ^2.6.1
   json_serializable: ^6.8.0
   
-
+  
 flutter:
   uses-material-design: true
